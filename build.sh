@@ -40,6 +40,7 @@ clang \
 	-Wl,--export=hb_shape \
 	-Wl,--export=hb_buffer_get_glyph_infos \
 	-Wl,--export=hb_buffer_get_glyph_positions \
+	-Wl,--export=hb_buffer_reverse_clusters \
 	-Wl,--export=hb_buffer_get_length \
 	-Wl,--export=hb_buffer_destroy \
 	-Wl,--export=hb_font_destroy \

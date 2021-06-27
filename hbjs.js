@@ -174,6 +174,12 @@ function hbjs(instance) {
         }[dir] || 0);
       },
       /**
+      * Reverses clusters in the buffer. Useful for RTL text.
+      */
+      reverseClusters: function () {
+        exports.hb_buffer_reverse_clusters(ptr);
+      },
+      /**
       * Set buffer flags explicitly.
       * @param {string[]} flags: A list of strings which may be either:
       * "BOT"
