@@ -232,6 +232,42 @@ function hbjs(instance) {
         exports.free(vars);
       },
       /**
+      * Gets the extents for the font, given a direction
+      * @param {"ltr"|"rtl"|"ttb"|"btt"} dir
+      */
+      getMetrics: function (dir) {
+        const extentsPtr = exports.malloc(4); // i32 * 12
+        const extentsOffset = extentsPtr / 4;
+        let ascender, descender, lineGap;
+
+        if (dir === 'ltr' || dir === 'rtl') {
+          exports.hb_ot_metrics_get_position_with_fallback(ptr, hb_tag('hasc'), extentsPtr);
+          ascender = heapi32[extentsOffset];
+          exports.hb_ot_metrics_get_position_with_fallback(ptr, hb_tag('hdsc'), extentsPtr);
+          descender = heapi32[extentsOffset];
+          exports.hb_ot_metrics_get_position_with_fallback(ptr, hb_tag('hlgp'), extentsPtr);
+          lineGap = heapi32[extentsOffset];
+        } else {
+          exports.hb_ot_metrics_get_position_with_fallback(ptr, hb_tag('vasc'), extentsPtr);
+          ascender = heapi32[extentsOffset];
+          exports.hb_ot_metrics_get_position_with_fallback(ptr, hb_tag('vdsc'), extentsPtr);
+          descender = heapi32[extentsOffset];
+          exports.hb_ot_metrics_get_position_with_fallback(ptr, hb_tag('vlgp'), extentsPtr);
+          lineGap = heapi32[extentsOffset];
+        }
+
+        exports.hb_ot_metrics_get_position_with_fallback(ptr, hb_tag('spyo'), extentsPtr);
+        const superscript = heapi32[extentsOffset];
+        exports.hb_ot_metrics_get_position_with_fallback(ptr, hb_tag('sbyo'), extentsPtr);
+        const subscript = heapi32[extentsOffset];
+        exports.hb_ot_metrics_get_position_with_fallback(ptr, hb_tag('xhgt'), extentsPtr);
+        const xHeight = heapi32[extentsOffset];
+
+        exports.free(extentsPtr);
+
+        return {ascender, descender, lineGap, superscript, subscript, xHeight};
+      },
+      /**
       * Free the object.
       */
       destroy: function () { exports.hb_font_destroy(ptr); }
