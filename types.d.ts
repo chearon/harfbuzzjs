@@ -47,9 +47,15 @@ declare namespace HarfbuzzJsInit {
     flags: number
   };
 
+  type AllocatedUint16Array = {
+    array: Uint16Array,
+    destroy: () => void
+  };
+
   type HbBuffer = {
     ptr: number,
     addText(text: string): void;
+    addUtf16(paragraphPtr: number, paragraphLength: number, offset: number, length: number): void;
     guessSegmentProperties(): void;
     setDirection(dir: 'ltr' | 'rtl' | 'ttb' | 'btt'): void;
     getDirection(): number,
@@ -59,6 +65,7 @@ declare namespace HarfbuzzJsInit {
     setClusterLevel(level: number): void;
     json(): HbGlyphInfo[];
     reverse(): void;
+    destroy(): void;
   };
 
   type Harfbuzz = {
@@ -66,6 +73,7 @@ declare namespace HarfbuzzJsInit {
     createFace(blob: HbBlob, index: number): HbFace,
     createFont(face: HbFace): HbFont,
     createBuffer(): HbBuffer,
+    allocateUint16Array(size: number): AllocatedUint16Array;
     shape(font: HbFont, buffer: HbBuffer): void;
   };
 }

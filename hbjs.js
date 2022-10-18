@@ -321,6 +321,15 @@ function hbjs(instance) {
         str.free();
       },
       /**
+       * @param {number} paragraphPtr pointer to start of utf-16 paragraph
+       * @param {number} paragraphLength size of utf-16 paragraph in units of 16 bits
+       * @param {number} offset offset into the paragraph to add
+       * @param {number} size of run in the paragraph to add
+       */
+      addUtf16(paragraphPtr, paragraphLength, offset, length) {
+        exports.hb_buffer_add_utf16(ptr, paragraphPtr, paragraphLength, offset, length);
+      },
+      /**
       * Set buffer script, language and direction.
       *
       * This needs to be done before shaping.
@@ -472,7 +481,14 @@ function hbjs(instance) {
     return JSON.parse(trace);
   }
 
+  function allocateUint16Array(size) {
+    const ptr = exports.malloc(size * 2);
+    const array = new Uint16Array(exports.memory.buffer, ptr, size);
+    return {array, destroy: function () { exports.free(ptr); }};
+  }
+
   return {
+    allocateUint16Array: allocateUint16Array,
     createBlob: createBlob,
     createFace: createFace,
     createFont: createFont,
