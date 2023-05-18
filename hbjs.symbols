@@ -26,6 +26,7 @@ _hb_font_get_extents_for_direction
 _hb_font_glyph_to_string
 _hb_font_set_scale
 _hb_font_set_variations
+_hb_style_get_value
 _hb_glyph_info_get_glyph_flags
 _hb_language_from_string
 _hb_ot_var_get_axis_infos

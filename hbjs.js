@@ -200,6 +200,9 @@ function hbjs(instance) {
         hbjs.ctx = ctx;
         exports.hbjs_glyph_draw(ptr, glyphId);
       },
+      getStyle(styleTag) {
+        return exports.hb_style_get_value(ptr, hb_tag(styleTag));
+      },
       /**
       * Return a glyph as a JSON path string
       * based on format described on https://svgwg.org/specs/paths/#InterfaceSVGPathSegment
@@ -508,6 +511,9 @@ hbjs.setCtx = function (_ctx) {
 };
 
 hbjs.env = {
+  hb_ot_layout_get_size_params() {
+    return 0;
+  },
   hbjs_glyph_draw_move_to(x, y) {
     hbjs.ctx.moveTo(x, y);
   },
