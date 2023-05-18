@@ -1,4 +1,15 @@
 declare namespace HarfbuzzJsInit {
+  type HbSet = {
+    ptr: number;
+    add(codepoint: number): void;
+    addRange(start: number, end: number): void;
+    union(set: HbSet): void;
+    copy(): HbSet;
+    subtract(set: HbSet): void;
+    getPopulation(): number;
+    destroy(): void;
+  };
+
   type HbBlob = {
     destroy(): void;
     countFaces(): number;
@@ -73,6 +84,7 @@ declare namespace HarfbuzzJsInit {
   };
 
   type Harfbuzz = {
+    createSet(): HbSet,
     createBlob(buffer: ArrayBuffer): HbBlob,
     createFace(blob: HbBlob, index: number): HbFace,
     createFont(face: HbFace): HbFont,

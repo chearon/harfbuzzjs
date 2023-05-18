@@ -40,6 +40,38 @@ function hbjs(instance) {
     return 0x0;
   }
 
+  function createSetInternal(uptr) {
+    const ptr = uptr || exports.hb_set_create();
+    return {
+      ptr,
+      add(codepoint) {
+        exports.hb_set_add(ptr, codepoint);
+      },
+      addRange(start, end) {
+        exports.hb_set_add_range(ptr, start, end);
+      },
+      union(set) {
+        exports.hb_set_union(ptr, set.ptr);
+      },
+      copy() {
+        return createSetInternal(exports.hb_set_copy(ptr));
+      },
+      subtract(set) {
+        exports.hb_set_subtract(ptr, set.ptr);
+      },
+      getPopulation() {
+        return exports.hb_set_get_population(ptr);
+      },
+      destroy() {
+        exports.hb_set_destroy(ptr);
+      }
+    };
+  }
+
+  function createSet() {
+    return createSetInternal();
+  }
+
   /**
   * Create an object representing a Harfbuzz blob.
   * @param {string} blob A blob of binary data (usually the contents of a font file).
@@ -518,6 +550,7 @@ function hbjs(instance) {
 
   return {
     allocateUint16Array: allocateUint16Array,
+    createSet: createSet,
     createBlob: createBlob,
     createFace: createFace,
     createFont: createFont,
