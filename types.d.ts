@@ -1,6 +1,7 @@
 declare namespace HarfbuzzJsInit {
   type HbBlob = {
     destroy(): void;
+    countFaces(): number;
     ptr: number;
   };
 

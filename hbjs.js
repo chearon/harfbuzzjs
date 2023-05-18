@@ -53,7 +53,10 @@ function hbjs(instance) {
       /**
       * Free the object.
       */
-      destroy: function () { exports.hb_blob_destroy(ptr); }
+      destroy: function () { exports.hb_blob_destroy(ptr); },
+      countFaces() {
+        return exports.hb_face_count(ptr);
+      }
     };
   }
 
