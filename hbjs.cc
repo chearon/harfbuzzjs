@@ -5,6 +5,18 @@ HB_BEGIN_DECLS
 int
 hbjs_glyph_svg (hb_font_t *font, hb_codepoint_t glyph, char *buf, unsigned buf_size);
 
+/* imports */
+void hbjs_glyph_draw_move_to(float to_x, float to_y);
+void hbjs_glyph_draw_line_to(float to_x, float to_y);
+void hbjs_glyph_draw_quadratic_to(float control_x, float control_y, float to_x, float to_y);
+void hbjs_glyph_draw_cubic_to(
+	  float control1_x, float control1_y,
+	  float control2_x, float control2_y,
+	  float to_x, float to_y);
+void hbjs_glyph_draw_close_path();
+
+void hbjs_glyph_draw(hb_font_t *font, hb_codepoint_t glyph);
+
 unsigned
 hbjs_shape_with_trace (hb_font_t *font, hb_buffer_t* buf,
                        char* featurestring,
@@ -72,7 +84,7 @@ _user_data_printf (user_data_t *data, const char *format, ...)
 }
 
 static void
-move_to (hb_draw_funcs_t *dfuncs, user_data_t *draw_data, hb_draw_state_t *,
+svg_move_to (hb_draw_funcs_t *dfuncs, user_data_t *draw_data, hb_draw_state_t *,
 	 float to_x, float to_y,
 	 void *)
 {
@@ -80,7 +92,7 @@ move_to (hb_draw_funcs_t *dfuncs, user_data_t *draw_data, hb_draw_state_t *,
 }
 
 static void
-line_to (hb_draw_funcs_t *dfuncs, user_data_t *draw_data, hb_draw_state_t *,
+svg_line_to (hb_draw_funcs_t *dfuncs, user_data_t *draw_data, hb_draw_state_t *,
 	 float to_x, float to_y,
 	 void *)
 {
@@ -88,7 +100,7 @@ line_to (hb_draw_funcs_t *dfuncs, user_data_t *draw_data, hb_draw_state_t *,
 }
 
 static void
-quadratic_to (hb_draw_funcs_t *dfuncs, user_data_t *draw_data, hb_draw_state_t *,
+svg_quadratic_to (hb_draw_funcs_t *dfuncs, user_data_t *draw_data, hb_draw_state_t *,
 	      float control_x, float control_y,
 	      float to_x, float to_y,
 	      void *)
@@ -101,7 +113,7 @@ quadratic_to (hb_draw_funcs_t *dfuncs, user_data_t *draw_data, hb_draw_state_t *
 }
 
 static void
-cubic_to (hb_draw_funcs_t *dfuncs, user_data_t *draw_data, hb_draw_state_t *,
+svg_cubic_to (hb_draw_funcs_t *dfuncs, user_data_t *draw_data, hb_draw_state_t *,
 	  float control1_x, float control1_y,
 	  float control2_x, float control2_y,
 	  float to_x, float to_y,
@@ -117,33 +129,92 @@ cubic_to (hb_draw_funcs_t *dfuncs, user_data_t *draw_data, hb_draw_state_t *,
 }
 
 static void
-close_path (hb_draw_funcs_t *dfuncs, user_data_t *draw_data, hb_draw_state_t *, void *)
+svg_close_path (hb_draw_funcs_t *dfuncs, user_data_t *draw_data, hb_draw_state_t *, void *)
 {
   _user_data_printf (draw_data, "Z");
 }
 
-static hb_draw_funcs_t *funcs = 0;
+static hb_draw_funcs_t *svg_funcs = 0;
 
 int
 hbjs_glyph_svg (hb_font_t *font, hb_codepoint_t glyph, char *buf, unsigned buf_size)
 {
-  if (funcs == 0) /* not the best pattern for multi-threaded apps which is not a concern here */
+  if (svg_funcs == 0) /* not the best pattern for multi-threaded apps which is not a concern here */
   {
-    funcs = hb_draw_funcs_create (); /* will be leaked */
-    hb_draw_funcs_set_move_to_func (funcs, (hb_draw_move_to_func_t) move_to, nullptr, nullptr);
-    hb_draw_funcs_set_line_to_func (funcs, (hb_draw_line_to_func_t) line_to, nullptr, nullptr);
-    hb_draw_funcs_set_quadratic_to_func (funcs, (hb_draw_quadratic_to_func_t) quadratic_to, nullptr, nullptr);
-    hb_draw_funcs_set_cubic_to_func (funcs, (hb_draw_cubic_to_func_t) cubic_to, nullptr, nullptr);
-    hb_draw_funcs_set_close_path_func (funcs, (hb_draw_close_path_func_t) close_path, nullptr, nullptr);
+    svg_funcs = hb_draw_funcs_create (); /* will be leaked */
+    hb_draw_funcs_set_move_to_func (svg_funcs, (hb_draw_move_to_func_t) svg_move_to, nullptr, nullptr);
+    hb_draw_funcs_set_line_to_func (svg_funcs, (hb_draw_line_to_func_t) svg_line_to, nullptr, nullptr);
+    hb_draw_funcs_set_quadratic_to_func (svg_funcs, (hb_draw_quadratic_to_func_t) svg_quadratic_to, nullptr, nullptr);
+    hb_draw_funcs_set_cubic_to_func (svg_funcs, (hb_draw_cubic_to_func_t) svg_cubic_to, nullptr, nullptr);
+    hb_draw_funcs_set_close_path_func (svg_funcs, (hb_draw_close_path_func_t) svg_close_path, nullptr, nullptr);
   }
 
   user_data_t draw_data(buf, buf_size);
-  hb_font_get_glyph_shape (font, glyph, funcs, &draw_data);
+  hb_font_get_glyph_shape (font, glyph, svg_funcs, &draw_data);
   if (draw_data.failure)
     return -1;
 
   buf[draw_data.consumed] = '\0';
   return draw_data.consumed;
+}
+
+static void
+glyph_draw_move_to (hb_draw_funcs_t *dfuncs, void *draw_data, hb_draw_state_t *,
+	 float to_x, float to_y,
+	 void *)
+{
+  hbjs_glyph_draw_move_to(to_x, to_y);
+}
+
+static void
+glyph_draw_line_to (hb_draw_funcs_t *dfuncs, void *draw_data, hb_draw_state_t *,
+	 float to_x, float to_y,
+	 void *)
+{
+  hbjs_glyph_draw_line_to(to_x, to_y);
+}
+
+static void
+glyph_draw_quadratic_to (hb_draw_funcs_t *dfuncs, void *draw_data, hb_draw_state_t *,
+	      float control_x, float control_y,
+	      float to_x, float to_y,
+	      void *)
+{
+  hbjs_glyph_draw_quadratic_to(control_x, control_y, to_x, to_y);
+}
+
+static void
+glyph_draw_cubic_to (hb_draw_funcs_t *dfuncs, void *draw_data, hb_draw_state_t *,
+	  float control1_x, float control1_y,
+	  float control2_x, float control2_y,
+	  float to_x, float to_y,
+	  void *)
+{
+  hbjs_glyph_draw_cubic_to(control1_x, control1_y, control2_x, control2_y, to_x, to_y);
+}
+
+static void
+glyph_draw_close_path (hb_draw_funcs_t *dfuncs, user_data_t *draw_data, hb_draw_state_t *, void *)
+{
+  hbjs_glyph_draw_close_path();
+}
+
+static hb_draw_funcs_t *glyph_draw_funcs = 0;
+
+void
+hbjs_glyph_draw(hb_font_t *font, hb_codepoint_t glyph)
+{
+  if (glyph_draw_funcs == 0)
+  {
+    glyph_draw_funcs = hb_draw_funcs_create ();
+    hb_draw_funcs_set_move_to_func (glyph_draw_funcs, (hb_draw_move_to_func_t) glyph_draw_move_to, nullptr, nullptr);
+    hb_draw_funcs_set_line_to_func (glyph_draw_funcs, (hb_draw_line_to_func_t) glyph_draw_line_to, nullptr, nullptr);
+    hb_draw_funcs_set_quadratic_to_func (glyph_draw_funcs, (hb_draw_quadratic_to_func_t) glyph_draw_quadratic_to, nullptr, nullptr);
+    hb_draw_funcs_set_cubic_to_func (glyph_draw_funcs, (hb_draw_cubic_to_func_t) glyph_draw_cubic_to, nullptr, nullptr);
+    hb_draw_funcs_set_close_path_func (glyph_draw_funcs, (hb_draw_close_path_func_t) glyph_draw_close_path, nullptr, nullptr);
+  }
+
+  hb_font_get_glyph_shape (font, glyph, glyph_draw_funcs, nullptr);
 }
 
 static hb_bool_t do_trace (hb_buffer_t *buffer,

@@ -23,6 +23,7 @@ declare namespace HarfbuzzJsInit {
 
   type HbFont = {
     ptr: number;
+    drawGlyph(gid: number, ctx: any): void;
     glyphToPath(gid: number): string;
     glyphToJson(gid: number): {type: string, values: number[]}[];
     setScale(xScale: number, yScale: number): void;

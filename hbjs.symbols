@@ -38,6 +38,7 @@ _hb_set_next_many
 _hb_shape
 _hbjs_glyph_svg
 _hbjs_shape_with_trace
+_hbjs_glyph_draw
 _malloc
 _free
 _free_ptr

@@ -16,6 +16,8 @@ em++ \
 	-DHB_EXPERIMENTAL_API \
 	--no-entry \
 	-s EXPORTED_FUNCTIONS=@hbjs.symbols \
+	-s ERROR_ON_UNDEFINED_SYMBOLS=0 \
+	-s WARN_ON_UNDEFINED_SYMBOLS=0 \
 	-s INITIAL_MEMORY=65MB \
 	-o hb.wasm \
 	hbjs.cc

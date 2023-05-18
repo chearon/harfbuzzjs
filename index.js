@@ -5,7 +5,7 @@ var hbjs = require('./hbjs.js')
 module.exports = new Promise(function (resolve, reject) {
   fs.readFile(path.resolve(__dirname, 'hb.wasm'), function (err, data) {
     if (err) { reject(err); return; }
-    WebAssembly.instantiate(data).then(function (result) {
+    WebAssembly.instantiate(data, {env: hbjs.env}).then(function (result) {
       resolve(hbjs(result.instance));
     }, reject);
   });

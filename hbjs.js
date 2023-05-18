@@ -196,6 +196,10 @@ function hbjs(instance) {
       ptr: ptr,
       glyphName: glyphName,
       glyphToPath: glyphToPath,
+      drawGlyph(glyphId, ctx) {
+        hbjs.ctx = ctx;
+        exports.hbjs_glyph_draw(ptr, glyphId);
+      },
       /**
       * Return a glyph as a JSON path string
       * based on format described on https://svgwg.org/specs/paths/#InterfaceSVGPathSegment
@@ -497,6 +501,29 @@ function hbjs(instance) {
     shapeWithTrace: shapeWithTrace
   };
 };
+
+
+hbjs.setCtx = function (_ctx) {
+  hbjs.ctx = _ctx;
+};
+
+hbjs.env = {
+  hbjs_glyph_draw_move_to(x, y) {
+    hbjs.ctx.moveTo(x, y);
+  },
+  hbjs_glyph_draw_line_to(x, y) {
+    hbjs.ctx.lineTo(x, y);
+  },
+  hbjs_glyph_draw_quadratic_to(control_x, control_y, to_x, to_y) {
+    hbjs.ctx.quadraticCurveTo(control_x, control_y, to_x, to_y);
+  },
+  hbjs_glyph_draw_cubic_to(control1_x, control1_y, control2_x, control2_y) {
+    hbjs.ctx.bezierCurveTo(control1_x, control1_y, control2_x, control2_y);
+  },
+  hbjs_glyph_draw_close_path() {
+    hbjs.ctx.closePath();
+  }
+}
 
 // Should be replaced with something more reliable
 try { module.exports = hbjs; } catch(e) {}
