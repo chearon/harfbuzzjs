@@ -23,6 +23,7 @@ declare namespace HarfbuzzJsInit {
     name: string;
     reference_table(name: string): Uint8Array;
     getName(nameId: number, language: string): string;
+    collectUnicodes(): HbSet;
   };
 
   type HbFontMetrics = {

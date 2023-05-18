@@ -200,6 +200,11 @@ function hbjs(instance) {
 
         return str;
       },
+      collectUnicodes() {
+        const setPtr = exports.hb_set_create();
+        exports.hb_face_collect_unicodes(ptr, setPtr);
+        return createSetInternal(setPtr);
+      },
       /**
        * Free the object.
        */
