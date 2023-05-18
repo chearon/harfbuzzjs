@@ -7,6 +7,7 @@ function hbjs(instance) {
   var heapi32 = new Int32Array(exports.memory.buffer);
   var heapf32 = new Float32Array(exports.memory.buffer);
   var utf8Decoder = new TextDecoder("utf8");
+  var utf16Decoder = new TextDecoder("utf-16");
 
   var HB_MEMORY_MODE_WRITABLE = 2;
   var HB_SET_VALUE_INVALID = -1;
@@ -92,6 +93,9 @@ function hbjs(instance) {
     return array;
   }
 
+  const fontNameBufferSize = 2048;
+  const fontNameBuffer = exports.malloc(fontNameBufferSize); // permanently allocated
+
   /**
   * Create an object representing a Harfbuzz face.
   * @param {object} blob An object returned from `createBlob`.
@@ -145,6 +149,21 @@ function hbjs(instance) {
         var result = typedArrayFromSet(unicodeSetPtr, Uint32Array);
         exports.hb_set_destroy(unicodeSetPtr);
         return result;
+      },
+      getName(nameId, language) {
+        const writtenPtr = exports.malloc(4);
+        const written = new Uint32Array(exports.memory.buffer, writtenPtr, 1);
+        const cLanguage = createAsciiString(language);
+        const hbLanguage = exports.hb_language_from_string(cLanguage, -1);
+        cLanguage.free();
+
+        written[0] = fontNameBufferSize;
+        exports.hb_ot_name_get_utf16(ptr, nameId, hbLanguage, writtenPtr, fontNameBuffer);
+        const str = utf16Decoder.decode(new Uint16Array(exports.memory.buffer, fontNameBuffer, written[0]));
+
+        exports.free(writtenPtr);
+
+        return str;
       },
       /**
        * Free the object.
