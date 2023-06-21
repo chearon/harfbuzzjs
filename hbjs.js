@@ -377,6 +377,9 @@ function hbjs(instance) {
     var ptr = exports.hb_buffer_create();
     return {
       ptr: ptr,
+      getLength() {
+        return exports.hb_buffer_get_length(ptr);
+      },
       /**
       * Add text to the buffer.
       * @param {string} text Text to be added to the buffer.
@@ -461,6 +464,21 @@ function hbjs(instance) {
       **/
       setClusterLevel: function (level) {
         exports.hb_buffer_set_cluster_level(ptr, level)
+      },
+      getGlyphInfos() {
+        const length = exports.hb_buffer_get_length(ptr);
+        const infosPtr = exports.hb_buffer_get_glyph_infos(ptr, 0);
+        const infosPtr32 = infosPtr / 4;
+        return heapu32.subarray(infosPtr32, infosPtr32 + 5 * length);
+      },
+      getGlyphPositions() {
+        const length = exports.hb_buffer_get_length(ptr);
+        const positionsPtr32 = exports.hb_buffer_get_glyph_positions(ptr, 0) / 4;
+        return heapi32.subarray(positionsPtr32, positionsPtr32 + 5 * length);
+      },
+      getGlyphFlags(glyphIndex) {
+        const infosPtr = exports.hb_buffer_get_glyph_infos(ptr, 0);
+        return exports.hb_glyph_info_get_glyph_flags(infosPtr + glyphIndex * 20);
       },
       /**
       * Return the buffer contents as a JSON object.

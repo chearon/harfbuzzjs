@@ -70,6 +70,7 @@ declare namespace HarfbuzzJsInit {
 
   type HbBuffer = {
     ptr: number,
+    getLength(): number;
     addText(text: string): void;
     addUtf16(paragraphPtr: number, paragraphLength: number, offset: number, length: number): void;
     guessSegmentProperties(): void;
@@ -79,6 +80,9 @@ declare namespace HarfbuzzJsInit {
     setLanguage(lang: string): void;
     setScript(script: string): void;
     setClusterLevel(level: number): void;
+    getGlyphInfos(): Int32Array;
+    getGlyphPositions(): Int32Array;
+    getGlyphFlags(glyphIndex: number): number;
     json(): HbGlyphInfo[];
     reverse(): void;
     destroy(): void;
